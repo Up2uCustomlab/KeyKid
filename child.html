@@ -43,7 +43,9 @@
     parent1:  isEng ? 'Parent'                  : 'ผู้ปกครอง',
     parent2:  isEng ? 'Parent 2'                : 'ผู้ปกครอง 2',
     age:      isEng ? (a) => `Age ${a}`         : (a) => `อายุ ${a} ปี`,
-    gender:   isEng ? (g) => g                  : (g) => `เพศ${g}`,
+    gender: isEng
+      ? (g) => g === 'ชาย' ? 'Male' : g === 'หญิง' ? 'Female' : g
+      : (g) => `เพศ${g === 'Male' ? 'ชาย' : g === 'Female' ? 'หญิง' : g}`,
     name:     isEng ? (n) => n                  : (n) => `น้อง${n}`,
   };
 
