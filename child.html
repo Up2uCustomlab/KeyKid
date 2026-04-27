@@ -210,10 +210,10 @@
   .ribbon h1 { font-family:'Fredoka One',cursive; color:#fff; font-size:1.5rem; text-shadow:0 2px 8px rgba(0,0,0,0.15); }
 
   .lang-toggle {
-    position: absolute;
-    top: 12px; right: 12px;
-    display: flex; gap: 4px;
-    z-index: 10;
+    position: fixed;
+    top: 16px; right: 16px;
+    display: flex; gap: 6px;
+    z-index: 999;
   }
   .lang-btn {
     background: rgba(255,255,255,0.25);
@@ -339,10 +339,6 @@
   </div>
 
   <div class="ribbon">
-    <div class="lang-toggle">
-      <button class="lang-btn" id="btn-th" onclick="switchLang('th')">🇹🇭 ไทย</button>
-      <button class="lang-btn" id="btn-en" onclick="switchLang('en')">🇬🇧 EN</button>
-    </div>
     <div class="sos-badge" id="sos-badge">🚨 SOS · ฉุกเฉิน</div>
     <h1 id="ribbon-title">พบเด็กหลงทาง</h1>
   </div>
