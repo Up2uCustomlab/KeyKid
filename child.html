@@ -24,16 +24,42 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  async function loadChild() {
-    const id = new URLSearchParams(window.location.search).get('id');
-    if (!id) { showError('ไม่พบ ID — URL ไม่ถูกต้อง'); return; }
+  const params = new URLSearchParams(window.location.search);
+  const isEng = params.get('lang') === 'en';
 
+  const txt = {
+    loading:  isEng ? '⏳ Loading...'           : '⏳ กำลังโหลดข้อมูล...',
+    noId:     isEng ? 'Invalid URL — no ID found' : 'ไม่พบ ID — URL ไม่ถูกต้อง',
+    noData:   isEng ? 'Child not found — may have been deleted' : 'ไม่พบข้อมูลเด็ก — ID อาจถูกลบแล้ว',
+    noConn:   isEng ? 'Cannot connect to Firebase' : 'เชื่อม Firebase ไม่ได้',
+    callText: isEng ? 'Call'                    : 'โทรหา',
+    callSub:  isEng ? 'Tap to call'             : 'กดโทรได้เลย',
+    address:  isEng ? '🏠 Home Address'         : '🏠 ที่อยู่บ้าน',
+    medical:  isEng ? 'Medical Info:'           : 'ข้อมูลสุขภาพ:',
+    medNote:  isEng ? 'Please inform the doctor if necessary.' : 'กรุณาแจ้งแพทย์หากมีความจำเป็น',
+    footer1:  isEng ? 'If you found this child, please contact the guardian immediately 🙏' : 'หากพบเด็ก กรุณาโทรแจ้งผู้ปกครองทันที 🙏',
+    sos:      isEng ? '🚨 SOS · Emergency'      : '🚨 SOS · ฉุกเฉิน',
+    title:    isEng ? 'Found a Lost Child'      : 'พบเด็กหลงทาง',
+    parent1:  isEng ? 'Parent'                  : 'ผู้ปกครอง',
+    parent2:  isEng ? 'Parent 2'                : 'ผู้ปกครอง 2',
+    age:      isEng ? (a) => `Age ${a}`         : (a) => `อายุ ${a} ปี`,
+    gender:   isEng ? (g) => g                  : (g) => `เพศ${g}`,
+    name:     isEng ? (n) => n                  : (n) => `น้อง${n}`,
+  };
+
+  async function loadChild() {
+    const id = params.get('id');
+    document.getElementById('loading').textContent = txt.loading;
+    document.getElementById('sos-badge').textContent = txt.sos;
+    document.getElementById('ribbon-title').textContent = txt.title;
+    document.getElementById('footer-text').textContent = txt.footer1;
+    if (!id) { showError(txt.noId); return; }
     try {
       const snap = await getDoc(doc(db, 'children', id));
-      if (!snap.exists()) { showError('ไม่พบข้อมูลเด็ก — ID อาจถูกลบแล้ว'); return; }
+      if (!snap.exists()) { showError(txt.noData); return; }
       render(snap.data());
     } catch(e) {
-      showError('เชื่อม Firebase ไม่ได้ — กรุณาตั้งค่า config ก่อน');
+      showError(txt.noConn);
     }
   }
 
@@ -41,34 +67,30 @@
     document.getElementById('loading').style.display = 'none';
     document.getElementById('content').style.display = 'block';
 
-    // รูป
     const photoEl = document.getElementById('photo-el');
     if (d.photoUrl) {
       photoEl.innerHTML = `<img src="${d.photoUrl}" alt="${d.name}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
     }
 
-    // ชื่อ/อายุ
-    document.getElementById('child-name').textContent = 'น้อง' + d.name;
+    document.getElementById('child-name').textContent = txt.name(d.name);
     const parts = [];
-    if (d.age) parts.push(`อายุ ${d.age} ปี`);
-    if (d.gender) parts.push(`เพศ${d.gender}`);
+    if (d.age) parts.push(txt.age(d.age));
+    if (d.gender) parts.push(txt.gender(d.gender));
     document.getElementById('child-age').textContent = parts.join(' · ') || '—';
 
-    // ปุ่มโทร
     const wrap = document.getElementById('call-wrap');
-    if (d.phone1) wrap.innerHTML += callBtn(d.phone1, d.label1 || 'ผู้ปกครอง', false);
-    if (d.phone2) wrap.innerHTML += callBtn(d.phone2, d.label2 || 'ผู้ปกครอง 2', true);
+    if (d.phone1) wrap.innerHTML += callBtn(d.phone1, d.label1 || txt.parent1, false);
+    if (d.phone2) wrap.innerHTML += callBtn(d.phone2, d.label2 || txt.parent2, true);
 
-    // ที่อยู่
     if (d.address) {
       document.getElementById('address-section').style.display = 'block';
+      document.getElementById('address-label').textContent = txt.address;
       document.getElementById('address-value').textContent = d.address;
     }
 
-    // สุขภาพ
     if (d.medical) {
       document.getElementById('medical-section').style.display = 'flex';
-      document.getElementById('medical-value').innerHTML = `<strong>ข้อมูลสุขภาพ:</strong><br>${d.medical}<br><small>กรุณาแจ้งแพทย์หากมีความจำเป็น</small>`;
+      document.getElementById('medical-value').innerHTML = `<strong>${txt.medical}</strong><br>${d.medical}<br><small>${txt.medNote}</small>`;
     }
   }
 
@@ -76,7 +98,7 @@
     const fmt = phone.replace(/(\d{3})(\d{3,4})(\d{4})/, '$1-$2-$3');
     return `<a href="tel:${phone}" class="call-btn ${secondary?'secondary':''}">
       <div class="call-icon">${secondary?'📱':'📞'}</div>
-      <div class="call-text"><small>โทรหา${label}ได้เลย</small><strong>${fmt}</strong></div>
+      <div class="call-text"><small>${txt.callSub} ${label}</small><strong>${fmt}</strong></div>
     </a>`;
   }
 
@@ -213,8 +235,8 @@
   </div>
 
   <div class="ribbon">
-    <div class="sos-badge">🚨 SOS · ฉุกเฉิน</div>
-    <h1>พบเด็กหลงทาง</h1>
+    <div class="sos-badge" id="sos-badge">🚨 SOS · ฉุกเฉิน</div>
+    <h1 id="ribbon-title">พบเด็กหลงทาง</h1>
   </div>
 
   <div id="loading">⏳ กำลังโหลดข้อมูล...</div>
@@ -232,7 +254,7 @@
     <div class="call-wrap" id="call-wrap"></div>
 
     <div class="section" id="address-section">
-      <div class="section-label">🏠 ที่อยู่บ้าน</div>
+      <div class="section-label" id="address-label">🏠 ที่อยู่บ้าน</div>
       <div class="section-value" id="address-value"></div>
     </div>
 
@@ -243,7 +265,7 @@
   </div>
 
   <div class="footer">
-    หากพบเด็ก กรุณาโทรแจ้งผู้ปกครองทันที 🙏<br>
+    <span id="footer-text">หากพบเด็ก กรุณาโทรแจ้งผู้ปกครองทันที 🙏</span><br>
     <span>KeyKid NFC · พวงกุญแจเพื่อความปลอดภัย</span>
   </div>
 </div>
