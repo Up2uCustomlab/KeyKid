@@ -9,9 +9,6 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  // ==============================
-  // 🔥 ใส่ Firebase Config เดียวกับ admin.html
-  // ==============================
   const firebaseConfig = {
     apiKey: "AIzaSyCGNUNA4PASLcN884s_5XiIiKwzfXc8FzU",
     authDomain: "keykid-16f0b.firebaseapp.com",
@@ -40,6 +37,7 @@
       medNote: 'กรุณาแจ้งแพทย์หากมีความจำเป็น',
       footer1: 'หากพบเด็ก กรุณาโทรแจ้งผู้ปกครองทันที 🙏',
       footerBrand: 'KeyKid NFC · พวงกุญแจเพื่อความปลอดภัย',
+      shopLink: '🛍️ พิกัดร้าน Up2uCustomlab',
       sos: '🚨 SOS · ฉุกเฉิน',
       title: 'พบเด็กหลงทาง',
       parent1: 'ผู้ปกครอง',
@@ -59,6 +57,7 @@
       medNote: 'Please inform the doctor if necessary.',
       footer1: 'If you found this child, please contact the guardian immediately 🙏',
       footerBrand: 'KeyKid NFC · Safety Keychain for Kids',
+      shopLink: '🛍️ Visit our shop Up2uCustomlab',
       sos: '🚨 SOS · Emergency',
       title: 'Found a Lost Child',
       parent1: 'Parent',
@@ -82,6 +81,7 @@
       document.getElementById('ribbon-title').textContent = txt.title;
       document.getElementById('footer-text').textContent = txt.footer1;
       document.getElementById('footer-brand').textContent = txt.footerBrand;
+      document.getElementById('shop-link').textContent = txt.shopLink;
     }
   };
 
@@ -93,6 +93,7 @@
     document.getElementById('ribbon-title').textContent = txt.title;
     document.getElementById('footer-text').textContent = txt.footer1;
     document.getElementById('footer-brand').textContent = txt.footerBrand;
+    document.getElementById('shop-link').textContent = txt.shopLink;
     document.getElementById('btn-th').classList.toggle('active', currentLang === 'th');
     document.getElementById('btn-en').classList.toggle('active', currentLang === 'en');
     if (!id) { showError(txt.noId); return; }
@@ -112,6 +113,7 @@
     document.getElementById('ribbon-title').textContent = txt.title;
     document.getElementById('footer-text').textContent = txt.footer1;
     document.getElementById('footer-brand').textContent = txt.footerBrand;
+    document.getElementById('shop-link').textContent = txt.shopLink;
     document.getElementById('child-name').textContent = txt.name(d.name);
     const parts = [];
     if (d.age) parts.push(txt.age(d.age));
@@ -154,17 +156,7 @@
     document.getElementById('error-msg').textContent = msg;
   }
 
-  window.switchLang = (lang) => {
-    const url = new URL(window.location.href);
-    if (lang === 'en') url.searchParams.set('lang', 'en');
-    else url.searchParams.delete('lang');
-    window.location.href = url.toString();
-  };
-
-  window.addEventListener('DOMContentLoaded', () => {
-    loadChild();
-    document.getElementById(isEng ? 'btn-en' : 'btn-th').classList.add('active');
-  });
+  window.addEventListener('DOMContentLoaded', loadChild);
 </script>
 <style>
   :root {
@@ -208,29 +200,6 @@
     font-family:'Fredoka One',cursive; font-size:1rem; margin-bottom:10px;
   }
   .ribbon h1 { font-family:'Fredoka One',cursive; color:#fff; font-size:1.5rem; text-shadow:0 2px 8px rgba(0,0,0,0.15); }
-
-  .lang-toggle {
-    position: fixed;
-    top: 16px; right: 16px;
-    display: flex; gap: 6px;
-    z-index: 999;
-  }
-  .lang-btn {
-    background: rgba(255,255,255,0.25);
-    border: 2px solid rgba(255,255,255,0.5);
-    border-radius: 20px;
-    padding: 4px 10px;
-    color: #fff;
-    font-family: 'Mitr', sans-serif;
-    font-size: 0.75rem;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .lang-btn.active {
-    background: rgba(255,255,255,0.6);
-    color: var(--coral);
-    font-weight: 600;
-  }
 
   .photo-wrap { display:flex; flex-direction:column; align-items:center; margin:28px 0 18px; }
   .photo-ring {
@@ -285,6 +254,7 @@
 
   .footer { text-align:center; margin-top:22px; font-size:0.72rem; color:#aaa; }
   .footer span { background:linear-gradient(90deg,var(--coral),var(--lavender)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:600; }
+  .footer a { background:linear-gradient(90deg,#FF7BAC,#C5A8F5); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:600; text-decoration:none; display:inline-block; }
 
   .stars { position:absolute; top:0;left:0;right:0;bottom:0; pointer-events:none; overflow:hidden; }
   .star { position:absolute; font-size:1rem; animation:twinkle 2s ease-in-out infinite; opacity:0.5; }
@@ -295,7 +265,7 @@
     top: 16px; right: 16px;
     display: flex;
     gap: 6px;
-    z-index: 100;
+    z-index: 999;
   }
   .lang-btn {
     padding: 6px 14px;
@@ -372,7 +342,7 @@
     <span id="footer-text">หากพบเด็ก กรุณาโทรแจ้งผู้ปกครองทันที 🙏</span><br>
     <span id="footer-brand">KeyKid NFC · พวงกุญแจเพื่อความปลอดภัย</span><br>
     <span>by Up2uCustomlab</span><br>
-    <a href="https://s.shopee.co.th/901aeJxlIM" target="_blank" style="background:linear-gradient(90deg,#FF7BAC,#C5A8F5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:600;font-size:0.72rem;">🛍️ พิกัดร้าน Up2uCustomlab</a>
+    <a id="shop-link" href="https://s.shopee.co.th/901aeJxlIM" target="_blank">🛍️ พิกัดร้าน Up2uCustomlab</a>
   </div>
 </div>
 

@@ -72,6 +72,16 @@
     </div>`;
   }
 
+  // ---- filter/search ----
+  window.filterChildren = (query) => {
+    const q = query.toLowerCase().trim();
+    const cards = document.querySelectorAll('.child-card');
+    cards.forEach(card => {
+      const text = card.textContent.toLowerCase();
+      card.style.display = !q || text.includes(q) ? 'flex' : 'none';
+    });
+  };
+
   // ---- load all ----
   async function loadChildren() {
     const list = document.getElementById('children-list');
@@ -496,7 +506,14 @@ textarea { resize: vertical; min-height: 70px; }
   </div>
 
   <!-- list -->
-  <div class="section-title">👦 รายการเด็กทั้งหมด</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+    <div class="section-title" style="margin-bottom:0">👦 รายการเด็กทั้งหมด</div>
+    <input id="search-input" type="text" placeholder="🔍 ค้นหาชื่อหรือเบอร์โทร..." 
+      style="padding:10px 16px;border:2px solid #EEE;border-radius:50px;font-family:'Mitr',sans-serif;font-size:0.9rem;outline:none;width:220px;transition:border-color 0.2s;"
+      oninput="filterChildren(this.value)"
+      onfocus="this.style.borderColor='#FF7BAC'"
+      onblur="this.style.borderColor='#EEE'">
+  </div>
   <div class="children-list" id="children-list"></div>
 
 </div>
